@@ -15,6 +15,14 @@ const btnCancelar = document.getElementById("btnCancelar");
 const tabla = document.getElementById("tabla");
 const mensaje = document.getElementById("mensaje");
 
+async function tokenCsrf() {
+    const respuesta = await fetch("/api/auth/csrf");
+    if (!respuesta.ok) {
+        throw new Error("No se pudo validar la sesión");
+    }
+    return (await respuesta.json()).token;
+}
+
 function mostrarMensaje(texto, esError) {
     mensaje.textContent = texto;
     mensaje.className = esError ? "error" : "ok";
@@ -108,7 +116,10 @@ formulario.addEventListener("submit", async function (evento) {
     try {
         const respuesta = await fetch(url, {
             method: metodo,
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "X-XSRF-TOKEN": await tokenCsrf()
+            },
             body: JSON.stringify(bus)
         });
 
@@ -130,7 +141,10 @@ async function eliminarBus(id) {
         return;
     }
     try {
-        const respuesta = await fetch(URL_API + "/" + id, { method: "DELETE" });
+        const respuesta = await fetch(URL_API + "/" + id, {
+            method: "DELETE",
+            headers: { "X-XSRF-TOKEN": await tokenCsrf() }
+        });
         if (respuesta.status === 204) {
             await cargarBuses("Bus eliminado");
         } else {

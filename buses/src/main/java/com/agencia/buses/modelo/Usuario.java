@@ -11,10 +11,14 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique = true, nullable = false)
+    // Aquí le decimos a Spring: "La variable se llama correo,
+    // pero guárdala en la columna 'email' de la base de datos".
+    @Column(name = "email", unique = true, nullable = false)
     private String correo;
 
-    @Column(nullable = false)
+    // Y aquí: "La variable se llama clave,
+    // pero guárdala en la columna 'password' de la base de datos"
+    @Column(name = "password", nullable = false)
     private String clave;
 
     private String nombre;

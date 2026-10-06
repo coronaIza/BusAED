@@ -21,10 +21,10 @@ PostgreSQL (Aiven)
 ## 3. Funcionalidades del sistema y estado real
 | # | Funcionalidad | Estado |
 |---|---|---|
-| 1 | Login / autenticación | **Pendiente.** Existen `Usuario` y `UsuarioRepositorio` (JPA), pero no hay login ni Spring Security configurado |
+| 1 | Login / autenticación | **Implementada.** Login por sesión, roles ADMIN/PASAJERO, registro de pasajeros y endpoints protegidos con Spring Security |
 | 2 | Gestión de buses (registrar, consultar, editar, eliminar) | **Implementada** (Integrante 1) |
 | 3 | Gestión de rutas | Pendiente |
-| 4 | Gestión de viajes | Pendiente |
+| 4 | Consulta de viajes | **Vista de pasajero implementada** con los viajes de demostración de `/api/viajes`; la gestión y persistencia siguen pendientes |
 | 5 | Gestión de pasajeros | Pendiente |
 | 6 | Reserva de pasajes / selección de asiento | Pendiente. `ReservaNegocio` tiene una cola en memoria y un mapa de asientos simulado, sin persistencia ni controlador |
 | 7 | Consulta de disponibilidad de asientos | Pendiente |
@@ -43,11 +43,12 @@ Java 17, Spring Boot 3.3.5, Maven, PostgreSQL (Aiven), JDBC, JPA, HTML/JavaScrip
 | Dependencia | Para qué se usa |
 |---|---|
 | spring-boot-starter-web | API REST y servir el frontend estático |
+| spring-boot-starter-security | Login por sesión, autorización por rol y protección CSRF |
 | spring-boot-starter-data-jpa | JPA: entidad `Usuario` y `UsuarioRepositorio` (módulo de otro integrante) |
 | postgresql | Driver JDBC de PostgreSQL |
 | spring-boot-devtools | Reinicio automático al guardar |
 
-No están agregadas todavía: `spring-boot-starter-security` y una librería JWT (las agregará quien haga el login; si se agrega Security sin configurarla, bloquea todos los endpoints).
+Las contraseñas nuevas se guardan con BCrypt. No se usa JWT: la sesión se conserva en una cookie de sesión.
 
 ## 7. JPA y JDBC conviven
 - **JDBC:** módulo de Buses (`BusDAO`) con SQL y `PreparedStatement` directos.
@@ -73,6 +74,14 @@ mvn spring-boot:run
 o ejecutar `BusesApplication` desde VS Code (ejecutar desde la carpeta raíz para que encuentre `.env`).
 - Frontend: http://localhost:8080
 - API: http://localhost:8080/api/buses
+
+### Primer acceso y roles
+- La raíz (`http://localhost:8080/`) lleva al inicio de sesión.
+- El registro público crea exclusivamente cuentas con rol `PASAJERO`; estas pueden consultar los viajes, pero no acceder a la página ni a la API de buses.
+- La vista de gestión de buses y todos los métodos de `/api/buses` requieren el rol `ADMIN`.
+- Para crear el primer administrador, configura las variables de entorno `APP_ADMIN_EMAIL`, `APP_ADMIN_PASSWORD` (entre 12 y 72 caracteres) y, opcionalmente, `APP_ADMIN_NAME` antes de iniciar Spring Boot. El usuario se crea solo si ese correo todavía no existe. No guardes la contraseña en el repositorio.
+- La tabla `usuario` debe existir con las columnas `id`, `correo`, `clave`, `nombre` y `rol`. Cuentas previas deben tener la clave codificada con BCrypt y un rol `ADMIN` o `PASAJERO`; las claves en texto plano no funcionarán y deben restablecerse.
+- La consulta de viajes muestra los datos de demostración que devuelve `/api/viajes`; todavía no hay reservas ni persistencia de viajes.
 
 ## 11. Cómo probar la API (Postman)
 Importa `docs/buses.postman_collection.json`. Para POST y PUT: Body > raw > JSON.

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar sesión | Agencia de buses</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 420px; margin: 10vh auto; padding: 0 16px; color: #17324d; }
+        main { padding: 28px; border: 1px solid #d7e0e8; border-radius: 12px; box-shadow: 0 8px 28px #17324d14; }
+        label { display: block; margin: 14px 0 5px; }
+        input, button { box-sizing: border-box; width: 100%; padding: 11px; font: inherit; }
+        button { margin-top: 18px; color: white; background: #145da0; border: 0; border-radius: 6px; cursor: pointer; }
+        a { color: #145da0; }
+        #mensaje { min-height: 22px; color: #a12622; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Agencia de buses</h1>
+    <p>Inicia sesión para continuar.</p>
+    <p id="mensaje" role="alert"></p>
+    <form id="formularioLogin">
+        <label for="correo">Correo</label>
+        <input id="correo" type="email" autocomplete="username" required>
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" autocomplete="current-password" required>
+        <button type="submit">Iniciar sesión</button>
+    </form>
+    <p>¿Aún no tienes cuenta? <a href="/registro.html">Regístrate como pasajero</a></p>
+</main>
+<script src="/login.js"></script>
+</body>
+</html>

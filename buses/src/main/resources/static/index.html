@@ -17,7 +17,10 @@
     </style>
 </head>
 <body>
-    <h1>Gestión de Buses</h1>
+    <header style="display:flex; align-items:center; justify-content:space-between; gap:16px">
+        <h1>Gestión de Buses</h1>
+        <button id="btnSalir" type="button">Cerrar sesión</button>
+    </header>
 
     <!-- Aquí se muestra la respuesta del backend (éxito o error) -->
     <p id="mensaje"></p>
@@ -45,6 +48,33 @@
         <tbody id="tabla"></tbody>
     </table>
 
-    <script src="buses.js"></script>
+    <script>
+        document.getElementById("btnSalir").addEventListener("click", async function () {
+            try {
+                const csrfRespuesta = await fetch("/api/auth/csrf");
+                if (!csrfRespuesta.ok) {
+                    throw new Error("No se pudo validar la sesión");
+                }
+                const csrf = await csrfRespuesta.json();
+                const respuesta = await fetch("/api/auth/logout", {
+                    method: "POST",
+                    headers: { "X-XSRF-TOKEN": csrf.token }
+                });
+                if (!respuesta.ok) {
+                    throw new Error("No se pudo cerrar la sesión");
+                }
+                window.location.assign("/login.html");
+            } catch (error) {
+                mostrarMensajeAdmin(error.message || "No se pudo cerrar la sesión", true);
+            }
+        });
+
+        function mostrarMensajeAdmin(texto, esError) {
+            const mensaje = document.getElementById("mensaje");
+            mensaje.textContent = texto;
+            mensaje.className = esError ? "error" : "ok";
+        }
+    </script>
+    <script src="/buses.js"></script>
 </body>
 </html>
