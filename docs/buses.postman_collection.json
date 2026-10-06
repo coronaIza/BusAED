@@ -1,0 +1,25 @@
+{
+  "info": {
+    "name": "Buses - Modulo Integrante 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:8080" }],
+  "item": [
+    { "name": "GET lista de buses",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/buses" } },
+    { "name": "GET bus por id",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/buses/1" } },
+    { "name": "POST registrar bus",
+      "request": { "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"placa\": \"ABC-123\",\n  \"modelo\": \"Mercedes Benz\",\n  \"capacidad\": 45,\n  \"estado\": \"ACTIVO\"\n}" },
+        "url": "{{baseUrl}}/api/buses" } },
+    { "name": "PUT actualizar bus",
+      "request": { "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"placa\": \"ABC-123\",\n  \"modelo\": \"Volvo\",\n  \"capacidad\": 40,\n  \"estado\": \"INACTIVO\"\n}" },
+        "url": "{{baseUrl}}/api/buses/1" } },
+    { "name": "DELETE eliminar bus",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/api/buses/1" } }
+  ]
+}
