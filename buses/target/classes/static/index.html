@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gestión de Buses</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 10px; }
+        form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        input, select, button { padding: 6px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #999; padding: 6px; text-align: left; }
+        th { background: #eee; }
+        #mensaje { min-height: 22px; font-weight: bold; }
+        .ok { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Gestión de Buses</h1>
+
+    <!-- Aquí se muestra la respuesta del backend (éxito o error) -->
+    <p id="mensaje"></p>
+
+    <!-- Formulario: sirve para REGISTRAR (POST) y para EDITAR (PUT) -->
+    <form id="formulario">
+        <input type="hidden" id="id">
+        <input type="text" id="placa" placeholder="Placa (ABC-123)" required>
+        <input type="text" id="modelo" placeholder="Modelo" required>
+        <input type="number" id="capacidad" placeholder="Capacidad" min="1" required>
+        <select id="estado">
+            <option value="ACTIVO">ACTIVO</option>
+            <option value="INACTIVO">INACTIVO</option>
+            <option value="MANTENIMIENTO">MANTENIMIENTO</option>
+        </select>
+        <button type="submit" id="btnGuardar">Registrar bus</button>
+        <button type="button" id="btnCancelar" hidden>Cancelar edición</button>
+    </form>
+
+    <!-- Tabla: se llena con los datos reales que devuelve GET /api/buses -->
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Placa</th><th>Modelo</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tabla"></tbody>
+    </table>
+
+    <script src="buses.js"></script>
+</body>
+</html>

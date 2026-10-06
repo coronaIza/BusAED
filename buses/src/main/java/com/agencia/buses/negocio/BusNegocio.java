@@ -48,10 +48,6 @@ public class BusNegocio implements IBusNegocio {
             throw new IllegalArgumentException("Ya existe un bus con la placa " + bus.getPlaca());
         }
 
-        // Si no envían estado, el bus nace como ACTIVO.
-        if (bus.getEstado() == null || bus.getEstado().isBlank()) {
-            bus.setEstado("ACTIVO");
-        }
         return dao.insertar(bus);
     }
 
@@ -81,7 +77,15 @@ public class BusNegocio implements IBusNegocio {
         if (dao.buscarPorId(id) == null) {
             throw new NoSuchElementException("No existe el bus con id " + id);
         }
-        dao.eliminar(id);
+        try {
+            dao.eliminar(id);
+        } catch (SQLException e) {
+            // 23503 = violación de llave foránea en PostgreSQL: el bus ya está usado en algún viaje.
+            if ("23503".equals(e.getSQLState())) {
+                throw new IllegalArgumentException("No se puede eliminar el bus porque tiene viajes asociados");
+            }
+            throw e;
+        }
     }
 
     // Validaciones comunes para registrar y actualizar.
@@ -109,6 +113,18 @@ public class BusNegocio implements IBusNegocio {
         // Validación 3: un bus sin asientos no tiene sentido.
         if (bus.getCapacidad() == null || bus.getCapacidad() <= 0) {
             throw new IllegalArgumentException("La capacidad debe ser mayor que cero");
+        }
+
+        // Regla de estado: si no envían estado, el bus nace ACTIVO.
+        // Solo se aceptan valores conocidos (se guardan siempre en mayúsculas).
+        if (bus.getEstado() == null || bus.getEstado().isBlank()) {
+            bus.setEstado("ACTIVO");
+        } else {
+            String estado = bus.getEstado().trim().toUpperCase();
+            if (!estado.equals("ACTIVO") && !estado.equals("INACTIVO") && !estado.equals("MANTENIMIENTO")) {
+                throw new IllegalArgumentException("El estado debe ser ACTIVO, INACTIVO o MANTENIMIENTO");
+            }
+            bus.setEstado(estado);
         }
     }
 }

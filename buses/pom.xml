@@ -28,6 +28,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- JPA/Hibernate: aporta las anotaciones jakarta.persistence.* usadas por @Entity, @Table, @Id, etc. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
         <!-- Driver de PostgreSQL: es lo que usa JDBC para conectarse a la base de datos -->
         <dependency>
             <groupId>org.postgresql</groupId>

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import com.agencia.buses.modelo.Bus;
 
-// Interfaz del Negocio: operaciones que el Controlador puede pedir.
+// MODIFICACIÓN: esta interfaz queda limitada a las operaciones de negocio de Bus.
 public interface IBusNegocio {
 
     ArrayList<Bus> listar() throws SQLException;
