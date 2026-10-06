@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-BusesApplication<buses>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.agencia.buses.BusesApplication",
+      "projectName": "buses",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
