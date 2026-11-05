@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hoja de ruta | Agencia de buses</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 24px auto; padding: 0 16px; color: #17324d; }
+        header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        button { padding: 9px 14px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #d7e0e8; padding: 12px; text-align: left; }
+        th { background: #edf4fa; }
+        #mensaje { min-height: 22px; }
+        .ok { color: #24713b; }
+        .error { color: #a12622; }
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <h1>Mi hoja de ruta</h1>
+        <p id="saludo">Consulta los viajes que tienes asignados.</p>
+    </div>
+    <button id="btnSalir" type="button">Cerrar sesión</button>
+</header>
+<p id="mensaje" role="status"></p>
+<table>
+    <thead>
+        <tr><th>Origen</th><th>Destino</th><th>Fecha</th><th>Hora</th><th>Bus</th><th>Estado</th><th>Acciones</th></tr>
+    </thead>
+    <tbody id="tablaViajes"></tbody>
+</table>
+<script src="/chofer.js"></script>
+</body>
+</html>
