@@ -96,8 +96,13 @@ public class AuthControlador {
                     .body(Map.of("error", "Ya existe una cuenta con ese correo"));
         }
 
+        // Si el admin envía un rol desde el formulario de personal, lo usamos.
+        // Si un pasajero se registra desde la web pública y no envía rol, será "cliente".
+        String rolAsignado = (datos.rol() != null && !datos.rol().isBlank())
+                            ? datos.rol().trim().toLowerCase(Locale.ROOT)
+                            : "cliente";
         Usuario usuario = new Usuario(correo, passwordEncoder.encode(datos.clave()),
-                datos.nombre().trim(), "cliente");
+        datos.nombre().trim(), rolAsignado);
         try {
             usuarios.save(usuario);
         } catch (DataIntegrityViolationException e) {
@@ -132,6 +137,6 @@ public class AuthControlador {
     public record LoginRequest(String correo, String clave) {
     }
 
-    public record RegistroRequest(String nombre, String correo, String clave) {
+    public record RegistroRequest(String nombre, String correo, String clave, String rol) {
     }
 }

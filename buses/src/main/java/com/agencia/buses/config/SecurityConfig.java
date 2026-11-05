@@ -76,7 +76,7 @@ public class SecurityConfig {
                                 "/api/auth/csrf", "/api/auth/login", "/api/auth/registro")
                         .permitAll()
                         .requestMatchers("/index.html", "/buses.js", "/rutas.html", "/rutas.js",
-                                "/viajes.html", "/viajes.js").hasRole("ADMIN")
+                                "/viajes.html", "/viajes.js","/personal.html", "/personal.js").hasRole("ADMIN")
                         .requestMatchers("/pasajero.html", "/pasajero.js", "/reservas.html", "/reservas.js")
                         .hasAnyRole("CLIENTE", "ADMIN")
                         .requestMatchers("/chofer.html", "/chofer.js").hasRole("CHOFER")
