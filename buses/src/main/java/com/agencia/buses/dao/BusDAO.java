@@ -135,13 +135,20 @@ public class BusDAO implements IBusDAO {
         }
     }
 
-    // Convierte una fila de la tabla (ResultSet) en un objeto Bus.
+    // Convierte una fila de la tabla (ResultSet) en un objeto Bus de forma segura.
     private Bus convertir(ResultSet rs) throws SQLException {
+        // Lee el estado y si es nulo, le asigna una cadena vacía para evitar errores NullPointerException
+        String estadoBaseDatos = rs.getString("estado");
+        if (estadoBaseDatos == null) {
+            estadoBaseDatos = "DESCONOCIDO";
+        }
+
         return new Bus(
                 rs.getInt("id"),
                 rs.getString("placa"),
                 rs.getString("modelo"),
                 rs.getInt("capacidad_total"),
-                rs.getString("estado"));
+                estadoBaseDatos // Enviamos la variable ya verificada
+        );
     }
 }

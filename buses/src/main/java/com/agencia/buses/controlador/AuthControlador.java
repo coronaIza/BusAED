@@ -139,4 +139,15 @@ public class AuthControlador {
 
     public record RegistroRequest(String nombre, String correo, String clave, String rol) {
     }
+    
+    // este endpoint es para que el admin pueda ver la lista de usuarios registrados
+    @GetMapping("/usuarios")
+    public ResponseEntity<?> listarUsuarios() {
+        try {
+            return ResponseEntity.ok(usuarios.findAll());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener usuarios"));
+        }
+    }
 }

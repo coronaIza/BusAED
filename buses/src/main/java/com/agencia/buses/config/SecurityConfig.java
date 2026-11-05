@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .requestMatchers("/pasajero.html", "/pasajero.js", "/reservas.html", "/reservas.js")
                         .hasAnyRole("CLIENTE", "ADMIN")
                         .requestMatchers("/chofer.html", "/chofer.js").hasRole("CHOFER")
-                        .requestMatchers("/api/buses/**", "/api/choferes/**").hasRole("ADMIN")
+                        .requestMatchers("/api/buses/**", "/api/choferes/**", "/api/auth/usuarios").hasRole("ADMIN")
                         .requestMatchers("/api/reservas/**").hasAnyRole("CLIENTE", "ADMIN")
                         // CHOFER: solo SU hoja de ruta.
                         .requestMatchers("/api/viajes/mi-hoja/**").hasRole("CHOFER")

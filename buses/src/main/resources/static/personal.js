@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. Obtener usuarios
     async function cargarPersonal() {
         try {
-            const respuesta = await fetch("/api/usuarios"); // Asume que tienes este endpoint o lo crearemos
+            const respuesta = await fetch("/api/auth/usuarios"); // RUTA que devuelve todos los usuarios
             if (respuesta.ok) {
                 const usuarios = await respuesta.json();
                 tablaPersonal.innerHTML = "";
