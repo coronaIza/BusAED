@@ -58,28 +58,26 @@ function llenarSelect(select, elementos, textoDe, textoInicial) {
 // Carga las 3 listas desplegables. Solo se ofrecen buses ACTIVOS (un bus en mantenimiento no puede viajar).
 async function cargarListas() {
     try {
-        const [rutasR, busesR, usuariosR] = await Promise.all([
+        const [rutasR, busesR, choferesR] = await Promise.all([
             fetch("/api/rutas"),
             fetch("/api/buses"),
-            fetch("/api/auth/usuarios") // ruta que filtra rol de los choferes
+            fetch("/api/choferesR") // ruta que filtra rol de los choferes
         ]);
-        if (!rutasR.ok || !busesR.ok || !usuariosR.ok) {
+        if (!rutasR.ok || !busesR.ok || !choferesR.ok) {
             mostrarMensaje("No se pudieron cargar las rutas, buses o choferes", true);
             return false;
         }
         const rutas = await rutasR.json();
         const buses = await busesR.json();
-        const usuarios = await usuariosR.json(); // ruta que filtra rol de los choferes
-
-        // Filtramos solo a los que tienen rol CHOFER
-        const choferes = usuarios.filter(u => (u.rol || "").toUpperCase() === "CHOFER");
+        const choferes = await choferesR.json(); // ruta que filtra rol de los choferes
 
         llenarSelect(campoRuta, rutas,
             function (r) { return r.origen + " → " + r.destino; }, "Ruta");
         llenarSelect(campoBus, buses.filter(function (b) { return (b.estado || "").toUpperCase() === "ACTIVO"; }),
             function (b) { return b.placa + " - " + b.modelo; }, "Bus");
-        // Ahora usamos "nombre" de la tabla usuario
-        llenarSelect(campoChofer, choferes, c => c.nombre, "Chofer");
+        // 3. Llenamos el select directamente con los datos del chofer
+        llenarSelect(campoChofer, choferes,
+            function (c) { return c.nombre + " " + (c.apellidos || ""); }, "Chofer");
         return true;
     } catch (e) {
         mostrarMensaje("No se pudo conectar con el servidor", true);

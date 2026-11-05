@@ -16,4 +16,7 @@ public interface IChoferDAO {
     // Busca el chofer vinculado al usuario con ese correo (tabla chofer.id_usuario -> usuario.email).
     // Devuelve null si el usuario no es un chofer.
     Chofer buscarPorCorreo(String correo) throws SQLException;
+
+    // NUEVO: Agregamos la funcionalidad de insertar
+    void insertar(Chofer chofer) throws SQLException;
 }

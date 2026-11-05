@@ -75,6 +75,27 @@ public class ChoferDAO implements IChoferDAO {
         return null;
     }
 
+    // NUEVO: Implementamos la inserción en la tabla 'chofer'
+    @Override
+    public void insertar(Chofer chofer) throws SQLException {
+        String sql = "INSERT INTO chofer (nombre, apellidos, licencia, telefono, id_usuario) VALUES (?, ?, ?, ?, ?)";
+        try (Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+             
+            ps.setString(1, chofer.getNombre());
+            ps.setString(2, chofer.getApellidos() != null ? chofer.getApellidos() : "");
+            ps.setString(3, chofer.getLicencia() != null ? chofer.getLicencia() : "Pendiente");
+            ps.setString(4, chofer.getTelefono() != null ? chofer.getTelefono() : "Pendiente");
+            
+            if (chofer.getIdUsuario() != null) {
+                ps.setInt(5, chofer.getIdUsuario());
+            } else {
+                ps.setNull(5, java.sql.Types.INTEGER);
+            }
+            ps.executeUpdate();
+        }
+    }
+
     private Chofer convertir(ResultSet rs) throws SQLException {
         Chofer chofer = new Chofer(
                 rs.getInt("id"),

@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.agencia.buses.dao.UsuarioRepositorio;
+import com.agencia.buses.dao.IChoferDAO;
 import com.agencia.buses.modelo.Usuario;
+import com.agencia.buses.modelo.Chofer;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,15 +38,18 @@ public class AuthControlador {
     private final SecurityContextRepository securityContextRepository;
     private final UsuarioRepositorio usuarios;
     private final PasswordEncoder passwordEncoder;
+    private final IChoferDAO choferDAO; // NUEVO: Inyectamos el DAO del chofer
 
     public AuthControlador(AuthenticationManager authenticationManager,
                            SecurityContextRepository securityContextRepository,
                            UsuarioRepositorio usuarios,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           IChoferDAO choferDAO) {
         this.authenticationManager = authenticationManager;
         this.securityContextRepository = securityContextRepository;
         this.usuarios = usuarios;
         this.passwordEncoder = passwordEncoder;
+        this.choferDAO = choferDAO;
     }
 
     @GetMapping("/csrf")
@@ -96,19 +101,31 @@ public class AuthControlador {
                     .body(Map.of("error", "Ya existe una cuenta con ese correo"));
         }
 
-        // Si el admin envía un rol desde el formulario de personal, lo usamos.
-        // Si un pasajero se registra desde la web pública y no envía rol, será "cliente".
         String rolAsignado = (datos.rol() != null && !datos.rol().isBlank())
                             ? datos.rol().trim().toLowerCase(Locale.ROOT)
                             : "cliente";
-        Usuario usuario = new Usuario(correo, passwordEncoder.encode(datos.clave()),
-        datos.nombre().trim(), rolAsignado);
+
+        Usuario usuario = new Usuario(correo, passwordEncoder.encode(datos.clave()), datos.nombre().trim(), rolAsignado);
+
         try {
-            usuarios.save(usuario);
+            // 1. Guarda al usuario y la base de datos genera su ID (ej: ID 18)
+            usuario = usuarios.save(usuario);
+
+            // 2. Si elegiste "chofer", lo inserta automáticamente en la tabla chofer
+            if ("chofer".equals(rolAsignado)) {
+                // Lo crea con datos básicos por defecto ("Pendiente") que luego se pueden actualizar
+                Chofer nuevoChofer = new Chofer(null, usuario.getNombre(), "", "Pendiente", "Pendiente", usuario.getId());
+                choferDAO.insertar(nuevoChofer);
+            }
+
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("error", "Ya existe una cuenta con ese correo"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error interno al registrar: " + e.getMessage()));
         }
+        
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("mensaje", "Cuenta creada. Ya puedes iniciar sesión."));
     }
@@ -140,7 +157,6 @@ public class AuthControlador {
     public record RegistroRequest(String nombre, String correo, String clave, String rol) {
     }
     
-    // este endpoint es para que el admin pueda ver la lista de usuarios registrados
     @GetMapping("/usuarios")
     public ResponseEntity<?> listarUsuarios() {
         try {
