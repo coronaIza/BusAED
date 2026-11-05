@@ -124,7 +124,7 @@ public class AuthControlador {
 
     private Map<String, String> respuestaUsuario(Authentication autenticacion, Usuario usuario) {
         String rol = autenticacion.getAuthorities().iterator().next().getAuthority()
-                .replaceFirst("^ROLE_", "");
+                .replaceFirst("^ROLE_", "").toLowerCase(Locale.ROOT);
         String nombre = usuario.getNombre() == null ? "" : usuario.getNombre();
         return Map.of("correo", usuario.getCorreo(), "nombre", nombre, "rol", rol);
     }

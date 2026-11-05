@@ -26,9 +26,9 @@ PostgreSQL (Aiven)
 | 3 | Gestión de rutas | Pendiente |
 | 4 | Consulta de viajes | **Vista de pasajero implementada** con los viajes de demostración de `/api/viajes`; la gestión y persistencia siguen pendientes |
 | 5 | Gestión de pasajeros | Pendiente |
-| 6 | Reserva de pasajes / selección de asiento | Pendiente. `ReservaNegocio` tiene una cola en memoria y un mapa de asientos simulado, sin persistencia ni controlador |
-| 7 | Consulta de disponibilidad de asientos | Pendiente |
-| 8 | Cancelación de reservas | Pendiente |
+| 6 | Reserva de pasajes / selección de asiento | **Implementada** con validación de viaje, capacidad y asiento por cliente autenticado |
+| 7 | Consulta de disponibilidad de asientos | **Implementada** a través de `/api/reservas/viaje/{id}/disponibilidad` |
+| 8 | Cancelación de reservas | **Implementada** con cancelación por cliente autenticado y liberación del asiento |
 
 Nota: `GET /api/buses` es parte de la funcionalidad "gestión de buses", no una funcionalidad aparte.
 
@@ -134,3 +134,13 @@ Listar, editar y eliminar siguen el mismo camino con `SELECT`, `UPDATE` y `DELET
 Login, Spring Security, JWT, rutas, viajes, pasajeros y reservas (son de otros integrantes).
 
 La guía para la exposición está en `docs/GUIA_DEFENSA.md`.
+
+## Cuentas de prueba
+| Nombre | Rol | Correo | Clave |
+|---|---|---|---|
+| Pepe | Cliente | cliente.prueba@correo.com | Cliente12345 |
+| Carlos | Chofer | chofer@agencia.com | Chofer12345 |
+| Jorge Pérez | Chofer | jorge.perez@agencia.com | Chofer12345 |
+| Luis García | Chofer | luis.garcia@agencia.com | Chofer12345 |
+# BusAED
+Proyecto algoritmo y estructura de datos

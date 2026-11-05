@@ -43,7 +43,9 @@ formularioLogin.addEventListener("submit", async function (evento) {
         }
 
         // Redirección condicional según el rol
-        window.location.assign(datos.rol === "ADMIN" ? "/index.html" : "/pasajero.html");
+        const destinos = { ADMIN: "/index.html", CHOFER: "/chofer.html" };
+        const rolNormalizado = datos.rol ? datos.rol.toUpperCase() : "";
+        window.location.assign(destinos[rolNormalizado] || "/pasajero.html");
     } catch (error) {
         mensajeLogin.textContent = error.message || "No se pudo conectar con el servidor";
     }

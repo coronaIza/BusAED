@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -39,7 +40,7 @@ public class SecurityConfig {
             Usuario usuario = usuarios.findByCorreo(correo)
                     .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
             String rol = usuario.getRol() == null ? "" : usuario.getRol().trim().toUpperCase(Locale.ROOT);
-            if (!rol.equals("ADMIN") && !rol.equals("CLIENTE")) {
+            if (!rol.equals("ADMIN") && !rol.equals("CLIENTE") && !rol.equals("CHOFER")) {
                 throw new AuthenticationServiceException("El usuario tiene un rol no válido");
             }
             return User.withUsername(usuario.getCorreo())
@@ -74,10 +75,21 @@ public class SecurityConfig {
                         .requestMatchers("/", "/login.html", "/registro.html", "/login.js", "/registro.js",
                                 "/api/auth/csrf", "/api/auth/login", "/api/auth/registro")
                         .permitAll()
-                        .requestMatchers("/index.html", "/buses.js").hasRole("ADMIN")
-                        .requestMatchers("/pasajero.html", "/pasajero.js").hasRole("CLIENTE")
-                        .requestMatchers("/api/buses/**").hasRole("ADMIN")
-                        .requestMatchers("/api/viajes/**").hasAnyRole("ADMIN", "CLIENTE")
+                        .requestMatchers("/index.html", "/buses.js", "/rutas.html", "/rutas.js",
+                                "/viajes.html", "/viajes.js").hasRole("ADMIN")
+                        .requestMatchers("/pasajero.html", "/pasajero.js", "/reservas.html", "/reservas.js")
+                        .hasAnyRole("CLIENTE", "ADMIN")
+                        .requestMatchers("/chofer.html", "/chofer.js").hasRole("CHOFER")
+                        .requestMatchers("/api/buses/**", "/api/choferes/**").hasRole("ADMIN")
+                        .requestMatchers("/api/reservas/**").hasAnyRole("CLIENTE", "ADMIN")
+                        // CHOFER: solo SU hoja de ruta.
+                        .requestMatchers("/api/viajes/mi-hoja/**").hasRole("CHOFER")
+                        // La hoja de ruta de un chofer cualquiera (por id) es solo del ADMIN.
+                        .requestMatchers("/api/viajes/chofer/**").hasRole("ADMIN")
+                        // Rutas y viajes: el CLIENTE solo puede CONSULTAR (GET); crear/editar/borrar es de ADMIN.
+                        // El orden importa: la regla de GET va antes que la regla general.
+                        .requestMatchers(HttpMethod.GET, "/api/rutas/**", "/api/viajes/**").hasAnyRole("ADMIN", "CLIENTE")
+                        .requestMatchers("/api/rutas/**", "/api/viajes/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/me").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(exceptions -> exceptions

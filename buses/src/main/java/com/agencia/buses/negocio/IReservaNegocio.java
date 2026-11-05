@@ -1,13 +1,20 @@
 package com.agencia.buses.negocio;
 
-import java.util.Queue;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
-// MODIFICACIÓN: las operaciones de reservas se separan de la gestión de buses.
+import com.agencia.buses.modelo.Reserva;
+
 public interface IReservaNegocio {
 
-    boolean[][] simularMapaAsientos(int filas, int columnas);
+    List<Reserva> listarPorViaje(Integer idViaje) throws SQLException;
 
-    String encolarReservaEspera(String pasajero);
+    List<Reserva> listarPorCliente(String correoCliente);
 
-    Queue<String> obtenerColaEspera();
+    Map<String, Object> consultarDisponibilidad(Integer idViaje) throws SQLException;
+
+    Reserva registrar(Reserva reserva, String correoCliente) throws SQLException;
+
+    Reserva cancelar(Integer idReserva, String correoCliente);
 }
