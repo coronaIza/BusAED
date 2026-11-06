@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const formularioPersonal = document.getElementById("formularioPersonal");
     const tablaPersonal = document.getElementById("tablaPersonal");
     const mensajeAlerta = document.getElementById("mensajeAlerta");
+    //Lógica para mostrar/ocultar los campos extra si es chofer
+    const selectRol = document.getElementById("rol");
+    const divCamposChofer = document.getElementById("camposChofer");
+
 
     // Tu sistema usa CSRF nativo, obtenemos el token para poder enviar datos
     async function tokenCsrf() {
@@ -13,6 +17,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Cargar el personal existente
     cargarPersonal();
 
+    // Lógica para mostrar/ocultar los campos extra si es chofer
+    selectRol.addEventListener("change", function() {
+        if (this.value === "CHOFER") {
+            divCamposChofer.style.display = "block";
+        } else {
+            divCamposChofer.style.display = "none";
+            // Limpiamos los campos si cambia de opinión
+            document.getElementById("apellidos").value = "";
+            document.getElementById("licencia").value = "";
+            document.getElementById("telefono").value = "";
+        }
+    });
+
     // 2. Registrar empleado
     formularioPersonal.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -20,9 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // OJO: Tu backend actual (AuthControlador) espera "nombre", "correo" y "clave"
         const empleado = {
             nombre: document.getElementById("nombre").value,
-            correo: document.getElementById("email").value, 
+            correo: document.getElementById("email").value,
             clave: document.getElementById("password").value,
-            rol: document.getElementById("rol").value 
+            rol: document.getElementById("rol").value,
+            // Nuevos campos (si están vacíos, se enviarán en blanco)
+            apellidos: document.getElementById("apellidos").value,
+            licencia: document.getElementById("licencia").value,
+            telefono: document.getElementById("telefono").value
         };
 
         try {
@@ -49,14 +70,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // 3. Obtener usuarios
+    // 3. Obtener usuarios y dibujarlos
     async function cargarPersonal() {
         try {
-            const respuesta = await fetch("/api/auth/usuarios"); // RUTA que devuelve todos los usuarios
+            const respuesta = await fetch("/api/auth/usuarios");
             if (respuesta.ok) {
                 const usuarios = await respuesta.json();
                 tablaPersonal.innerHTML = "";
-                
-                // Excluimos a los PASAJEROS de esta vista
+
                 const empleados = usuarios.filter(u => (u.rol || "").toUpperCase() !== "CLIENTE");
 
                 empleados.forEach(emp => {
@@ -64,19 +85,80 @@ document.addEventListener("DOMContentLoaded", () => {
                     let colorRol = rolMayus === 'ADMIN' ? 'bg-danger' : 
                                    rolMayus === 'CHOFER' ? 'bg-primary' : 'bg-success';
 
+                    let estadoActual = emp.estado || 'ACTIVO';
+                    let colorEstado = estadoActual === 'ACTIVO' ? 'bg-success' : 'bg-secondary';
+                    let iconoBoton = estadoActual === 'ACTIVO' ? 'bi-slash-circle' : 'bi-check-circle';
+                    let claseBoton = estadoActual === 'ACTIVO' ? 'btn-outline-warning' : 'btn-outline-success';
+                    let titleBoton = estadoActual === 'ACTIVO' ? 'Desactivar Empleado' : 'Reactivar Empleado';
+
                     tablaPersonal.innerHTML += `
-                        <tr>
+                        <tr class="${estadoActual === 'INACTIVO' ? 'text-muted' : ''}">
                             <td>${emp.id || '-'}</td>
                             <td class="fw-bold">${emp.nombre}</td>
                             <td>${emp.correo || emp.email}</td>
                             <td><span class="badge ${colorRol}">${rolMayus}</span></td>
+                            <td><span class="badge ${colorEstado}">${estadoActual}</span></td>
                             <td>
-                                <button class="btn btn-sm btn-outline-danger" onclick="alert('En construcción')">
+                                <!-- Botón de Borrado Lógico -->
+                                <button class="btn btn-sm ${claseBoton} btn-alternar-estado me-1" data-id="${emp.id}" title="${titleBoton}">
+                                    <i class="bi ${iconoBoton}"></i>
+                                </button>
+                                <!-- Botón de Borrado Físico (Para errores) -->
+                                <button class="btn btn-sm btn-outline-danger btn-eliminar-fisico" data-id="${emp.id}" title="Eliminar registro erróneo">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </td>
                         </tr>
                     `;
+                });
+
+                // Evento 1: Alternar estado (Borrado Lógico)
+                document.querySelectorAll('.btn-alternar-estado').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        const idEmpleado = this.getAttribute('data-id');
+                        if (confirm(`¿Cambiar el estado de acceso del empleado con ID ${idEmpleado}?`)) {
+                            try {
+                                const res = await fetch(`/api/auth/usuarios/${idEmpleado}/estado`, {
+                                    method: "PATCH",
+                                    headers: { "X-XSRF-TOKEN": await tokenCsrf() }
+                                });
+                                
+                                if (res.ok) {
+                                    mostrarAlerta("Estado del empleado actualizado", "success");
+                                    cargarPersonal(); 
+                                } else {
+                                    mostrarAlerta("No se pudo cambiar el estado", "danger");
+                                }
+                            } catch (e) {
+                                mostrarAlerta("Error de conexión al intentar actualizar", "danger");
+                            }
+                        }
+                    });
+                });
+
+                // Evento 2: Eliminar definitivamente (Borrado Físico)
+                document.querySelectorAll('.btn-eliminar-fisico').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        const idEmpleado = this.getAttribute('data-id');
+                        if (confirm(`ATENCIÓN: ¿Estás seguro de ELIMINAR FÍSICAMENTE al empleado con ID ${idEmpleado}? Esto no se puede deshacer.`)) {
+                            try {
+                                const res = await fetch(`/api/auth/usuarios/${idEmpleado}`, {
+                                    method: "DELETE",
+                                    headers: { "X-XSRF-TOKEN": await tokenCsrf() }
+                                });
+                                
+                                if (res.ok) {
+                                    mostrarAlerta("Empleado eliminado del sistema", "success");
+                                    cargarPersonal(); 
+                                } else {
+                                    const errorData = await res.json();
+                                    mostrarAlerta(errorData.error || "No se pudo eliminar al empleado", "danger");
+                                }
+                            } catch (e) {
+                                mostrarAlerta("Error de conexión al intentar eliminar", "danger");
+                            }
+                        }
+                    });
                 });
             }
         } catch (error) {

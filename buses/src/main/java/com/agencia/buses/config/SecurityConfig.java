@@ -39,6 +39,12 @@ public class SecurityConfig {
         return correo -> {
             Usuario usuario = usuarios.findByCorreo(correo)
                     .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+            // Bloqueo por borrado lógico
+            if ("INACTIVO".equalsIgnoreCase(usuario.getEstado())) {
+                throw new AuthenticationServiceException("Tu cuenta ha sido desactivada por un administrador.");
+            }
+
             String rol = usuario.getRol() == null ? "" : usuario.getRol().trim().toUpperCase(Locale.ROOT);
             if (!rol.equals("ADMIN") && !rol.equals("CLIENTE") && !rol.equals("CHOFER")) {
                 throw new AuthenticationServiceException("El usuario tiene un rol no válido");
@@ -80,7 +86,7 @@ public class SecurityConfig {
                         .requestMatchers("/pasajero.html", "/pasajero.js", "/reservas.html", "/reservas.js")
                         .hasAnyRole("CLIENTE", "ADMIN")
                         .requestMatchers("/chofer.html", "/chofer.js").hasRole("CHOFER")
-                        .requestMatchers("/api/buses/**", "/api/choferes/**", "/api/auth/usuarios").hasRole("ADMIN")
+                        .requestMatchers("/api/buses/**", "/api/choferes/**", "/api/auth/usuarios/**").hasRole("ADMIN")
                         .requestMatchers("/api/reservas/**").hasAnyRole("CLIENTE", "ADMIN")
                         // CHOFER: solo SU hoja de ruta.
                         .requestMatchers("/api/viajes/mi-hoja/**").hasRole("CHOFER")

@@ -16,7 +16,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -111,10 +114,13 @@ public class AuthControlador {
             // 1. Guarda al usuario y la base de datos genera su ID (ej: ID 18)
             usuario = usuarios.save(usuario);
 
-            // 2. Si elegiste "chofer", lo inserta automáticamente en la tabla chofer
+            // 2. Si elegiste "chofer", lo inserta automáticamente en la tabla chofer y usa los datos reales del formulario
             if ("chofer".equals(rolAsignado)) {
+                String apellidosReales = (datos.apellidos() != null && !datos.apellidos().isBlank()) ? datos.apellidos().trim() : "";
+                String licenciaReal = (datos.licencia() != null && !datos.licencia().isBlank()) ? datos.licencia().trim() : "Sin Licencia";
+                String telefonoReal = (datos.telefono() != null && !datos.telefono().isBlank()) ? datos.telefono().trim() : "Sin Teléfono";
                 // Lo crea con datos básicos por defecto ("Pendiente") que luego se pueden actualizar
-                Chofer nuevoChofer = new Chofer(null, usuario.getNombre(), "", "Pendiente", "Pendiente", usuario.getId());
+                Chofer nuevoChofer = new Chofer(null, usuario.getNombre(), apellidosReales, licenciaReal, telefonoReal, usuario.getId());
                 choferDAO.insertar(nuevoChofer);
             }
 
@@ -154,9 +160,10 @@ public class AuthControlador {
     public record LoginRequest(String correo, String clave) {
     }
 
-    public record RegistroRequest(String nombre, String correo, String clave, String rol) {
+    public record RegistroRequest(String nombre, String correo, String clave, String rol,
+                                  String apellidos, String licencia, String telefono) {
     }
-    
+
     @GetMapping("/usuarios")
     public ResponseEntity<?> listarUsuarios() {
         try {
@@ -166,4 +173,70 @@ public class AuthControlador {
                     .body(Map.of("error", "Error al obtener usuarios"));
         }
     }
+
+    // ENDPOINT: Eliminar un usuario por su ID
+    @DeleteMapping("/usuarios/{id}")
+    public ResponseEntity<?> eliminarUsuario(@PathVariable Integer id) {
+        try {
+            // 1. Verificamos si el usuario existe en la base de datos
+            Usuario usuario = usuarios.findById(id).orElse(null);
+            if (usuario == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "El usuario no existe"));
+            }
+
+            // 2. Si es chofer, buscamos su registro en la tabla chofer y lo borramos primero
+            if ("chofer".equalsIgnoreCase(usuario.getRol())) {
+                try {
+                    Chofer choferBD = choferDAO.buscarPorCorreo(usuario.getCorreo());
+                    if (choferBD != null) {
+                        // Ahora sí, llamamos al método eliminar que acabas de crear
+                        choferDAO.eliminar(choferBD.getId());
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error al intentar borrar el registro del chofer: " + e.getMessage());
+                }
+            }
+
+            // 3. Finalmente, borramos el usuario
+            // (Si hay registros en reserva_boleto ligados a este ID, saltará la excepción de conflicto)
+            usuarios.deleteById(id);
+
+            return ResponseEntity.ok(Map.of("mensaje", "Usuario eliminado correctamente"));
+
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "No se puede eliminar porque este empleado está asignado a un viaje o proceso activo."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error interno al eliminar"));
+        }
+    }
+
+    // NUEVO ENDPOINT: Borrado lógico (Alternar estado Activo/Inactivo)
+    @PatchMapping("/usuarios/{id}/estado")
+    public ResponseEntity<?> alternarEstadoUsuario(@PathVariable Integer id) {
+        try {
+            Usuario usuario = usuarios.findById(id).orElse(null);
+            if (usuario == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "El usuario no existe"));
+            }
+
+            // Si está activo, lo inactiva. Si está inactivo, lo reactiva.
+            if ("ACTIVO".equalsIgnoreCase(usuario.getEstado())) {
+                usuario.setEstado("INACTIVO");
+            } else {
+                usuario.setEstado("ACTIVO");
+            }
+
+            usuarios.save(usuario);
+            return ResponseEntity.ok(Map.of("mensaje", "Estado actualizado a " + usuario.getEstado()));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error interno al cambiar el estado"));
+        }
+    }
+
 }

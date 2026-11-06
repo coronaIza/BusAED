@@ -19,4 +19,7 @@ public interface IChoferDAO {
 
     // NUEVO: Agregamos la funcionalidad de insertar
     void insertar(Chofer chofer) throws SQLException;
+
+    // Elimina un chofer por su ID
+    void eliminar(Integer id) throws SQLException;
 }

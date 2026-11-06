@@ -6,23 +6,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const tablaViajes = document.getElementById("tablaViajes");
     const mensajeViajes = document.getElementById("mensajeChofer");
     
-    // Elementos de la interfaz para interactuar (Tarjetas y sección oculta)
+    // Elementos de la interfaz para interactuar
     const btnConsultarRuta = document.getElementById("btnConsultarRuta");
     const btnRegistroViaje = document.getElementById("btnRegistroViaje");
     const seccionHojaRuta = document.getElementById("seccionHojaRuta");
     const btnCerrarSeccion = document.getElementById("btnCerrarSeccion");
     
+    // Elementos dinámicos que cambian según el modo
+    const tituloSeccion = document.getElementById("tituloSeccion");
+    const columnaAccion = document.getElementById("columnaAccion");
+    
     let usuarioCargado = false;
+    let modoActual = 'consultar'; // Variable para saber en qué modo estamos
 
-    // Mostrar/Ocultar sección al hacer clic en las tarjetas
-    if (btnConsultarRuta) btnConsultarRuta.addEventListener("click", () => mostrarSeccionHojaRuta());
-    if (btnRegistroViaje) btnRegistroViaje.addEventListener("click", () => mostrarSeccionHojaRuta());
+    // Detectamos qué tarjeta se clickeó y pasamos el modo correspondiente
+    if (btnConsultarRuta) btnConsultarRuta.addEventListener("click", () => mostrarSeccionHojaRuta('consultar'));
+    if (btnRegistroViaje) btnRegistroViaje.addEventListener("click", () => mostrarSeccionHojaRuta('registro'));
     if (btnCerrarSeccion) btnCerrarSeccion.addEventListener("click", () => seccionHojaRuta.style.display = "none");
 
-    function mostrarSeccionHojaRuta() {
+    function mostrarSeccionHojaRuta(modo) {
+        modoActual = modo; // Guardamos el modo seleccionado
         seccionHojaRuta.style.display = "block";
-        cargarHojaDeRuta();
-        // Desplaza la pantalla suavemente hacia la tabla
+        
+        // Adaptamos la interfaz visualmente
+        if (modo === 'consultar') {
+            tituloSeccion.innerHTML = '<i class="bi bi-map"></i> Detalles de la Hoja de Ruta';
+            columnaAccion.style.display = 'none'; // Ocultamos la cabecera de Acción
+        } else if (modo === 'registro') {
+            tituloSeccion.innerHTML = '<i class="bi bi-clock-history"></i> Registro de Inicio / Fin de Viaje';
+            columnaAccion.style.display = ''; // Mostramos la cabecera de Acción
+        }
+
+        cargarHojaDeRuta(); // Llamamos a la base de datos
         seccionHojaRuta.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -76,7 +91,9 @@ document.addEventListener("DOMContentLoaded", () => {
             tablaViajes.innerHTML = "";
             
             if (viajes.length === 0) {
-                tablaViajes.innerHTML = "<tr><td colspan='5' class='text-muted py-4'>No tienes viajes asignados en este momento.</td></tr>";
+                // Ajustamos el colspan dependiendo del modo para que el mensaje no se vea chueco
+                let columnas = modoActual === 'registro' ? 5 : 4;
+                tablaViajes.innerHTML = `<tr><td colspan='${columnas}' class='text-muted py-4'>No tienes viajes asignados en este momento.</td></tr>`;
                 if (mensajeExito) mostrarMensaje(mensajeExito, false);
                 return;
             }
@@ -84,22 +101,26 @@ document.addEventListener("DOMContentLoaded", () => {
             viajes.forEach(function (viaje) {
                 const fila = document.createElement("tr");
 
-                // Badge de colores para el estado
                 let estadoColor = viaje.estado === 'EN CURSO' ? 'bg-primary' : 
                                   viaje.estado === 'FINALIZADO' ? 'bg-success' : 'bg-secondary';
 
-                // Lógica de botones de registro de inicio/fin
-                let botonAccion = "";
-                if (viaje.estado === "PROGRAMADO") {
-                    botonAccion = `<button class="btn btn-sm btn-primary w-100 btn-accion-viaje" data-id="${viaje.id}" data-estado="EN CURSO">
-                                     <i class="bi bi-play-circle"></i> Iniciar Viaje
-                                   </button>`;
-                } else if (viaje.estado === "EN CURSO") {
-                    botonAccion = `<button class="btn btn-sm btn-success w-100 btn-accion-viaje" data-id="${viaje.id}" data-estado="FINALIZADO">
-                                     <i class="bi bi-stop-circle"></i> Finalizar Viaje
-                                   </button>`;
-                } else {
-                    botonAccion = `<span class="text-muted"><i class="bi bi-check2-all"></i> Completado</span>`;
+                let tdAccion = ""; // Variable para la celda de acción
+                
+                // SOLO construimos la columna de botones si estamos en modo "registro"
+                if (modoActual === 'registro') {
+                    let botonAccion = "";
+                    if (viaje.estado === "PROGRAMADO") {
+                        botonAccion = `<button class="btn btn-sm btn-primary w-100 btn-accion-viaje" data-id="${viaje.id}" data-estado="EN CURSO">
+                                         <i class="bi bi-play-circle"></i> Iniciar Viaje
+                                       </button>`;
+                    } else if (viaje.estado === "EN CURSO") {
+                        botonAccion = `<button class="btn btn-sm btn-success w-100 btn-accion-viaje" data-id="${viaje.id}" data-estado="FINALIZADO">
+                                         <i class="bi bi-stop-circle"></i> Finalizar Viaje
+                                       </button>`;
+                    } else {
+                        botonAccion = `<span class="text-muted"><i class="bi bi-check2-all"></i> Completado</span>`;
+                    }
+                    tdAccion = `<td>${botonAccion}</td>`;
                 }
 
                 fila.innerHTML = `
@@ -107,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${viaje.fechaSalida || '-'} <br> <small class="text-muted">${(viaje.horaSalida || "").substring(0, 5)}</small></td>
                     <td>${viaje.placaBus || 'Sin asignar'}</td>
                     <td><span class="badge ${estadoColor} p-2">${viaje.estado}</span></td>
-                    <td>${botonAccion}</td>
+                    ${tdAccion} <!-- Insertamos la celda (vacía en modo consultar, con botón en modo registro) -->
                 `;
                 tablaViajes.appendChild(fila);
             });

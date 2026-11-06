@@ -22,7 +22,11 @@ public class Usuario {
     private String clave;
 
     private String nombre;
-    private String rol; // ADMIN o PASAJERO
+    private String rol; // ADMIN, PASAJERO, CHOFER, etc.
+
+    // NUEVO: Atributo para el borrado lógico
+    @Column(name = "estado")
+    private String estado = "ACTIVO";
 
     public Usuario() {}
 
@@ -31,6 +35,7 @@ public class Usuario {
         this.clave = clave;
         this.nombre = nombre;
         this.rol = rol;
+        this.estado = "ACTIVO"; // Por defecto al crear la cuenta
     }
 
     public Integer getId() { return id; }
@@ -47,4 +52,7 @@ public class Usuario {
 
     public String getRol() { return rol; }
     public void setRol(String rol) { this.rol = rol; }
+
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 }

@@ -25,7 +25,12 @@ public class ChoferDAO implements IChoferDAO {
     @Override
     public ArrayList<Chofer> listar() throws SQLException {
         ArrayList<Chofer> choferes = new ArrayList<>();
-        String sql = SELECT + " ORDER BY apellidos, nombre";
+        // NUEVO SQL: Solo traemos a los choferes cuyo usuario enlazado esté ACTIVO
+        String sql = "SELECT c.id, c.nombre, c.apellidos, c.licencia, c.telefono, c.id_usuario " +
+                     "FROM chofer c " +
+                     "JOIN usuario u ON c.id_usuario = u.id " +
+                     "WHERE u.estado = 'ACTIVO' " +
+                     "ORDER BY c.apellidos, c.nombre";
 
         try (Connection con = db.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -92,6 +97,17 @@ public class ChoferDAO implements IChoferDAO {
             } else {
                 ps.setNull(5, java.sql.Types.INTEGER);
             }
+            ps.executeUpdate();
+        }
+    }
+
+    // Implementamos la eliminación física del chofer
+    @Override
+    public void eliminar(Integer id) throws SQLException {
+        String sql = "DELETE FROM chofer WHERE id = ?";
+        try (Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
             ps.executeUpdate();
         }
     }

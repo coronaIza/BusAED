@@ -61,7 +61,7 @@ async function cargarListas() {
         const [rutasR, busesR, choferesR] = await Promise.all([
             fetch("/api/rutas"),
             fetch("/api/buses"),
-            fetch("/api/choferesR") // ruta que filtra rol de los choferes
+            fetch("/api/choferes") // ruta que filtra rol de los choferes
         ]);
         if (!rutasR.ok || !busesR.ok || !choferesR.ok) {
             mostrarMensaje("No se pudieron cargar las rutas, buses o choferes", true);
