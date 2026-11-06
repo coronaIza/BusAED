@@ -28,6 +28,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Autenticacion por sesion y proteccion de endpoints segun rol -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!-- JPA/Hibernate: aporta las anotaciones jakarta.persistence.* usadas por @Entity, @Table, @Id, etc. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

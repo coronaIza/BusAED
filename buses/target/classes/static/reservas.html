@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservas de pasajes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 24px auto;
+            padding: 0 16px;
+            color: #17324d;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .grupo {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        select, button {
+            padding: 8px 10px;
+        }
+        #grillaAsientos {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(48px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .asiento {
+            border: 1px solid #b7c8d6;
+            background: #eaf6ea;
+            color: #1d5a2d;
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 10px 0;
+        }
+        .asiento.ocupado {
+            background: #f3d7d7;
+            color: #7d2c2c;
+            border-color: #d59f9f;
+            cursor: not-allowed;
+        }
+        .asiento.seleccionado {
+            background: #dfeafc;
+            border-color: #7ba0d8;
+            color: #153f82;
+        }
+        .resumen {
+            margin-top: 20px;
+        }
+        #mensaje {
+            min-height: 22px;
+            font-weight: bold;
+        }
+        .ok { color: green; }
+        .error { color: red; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        th, td {
+            border: 1px solid #d7e0e8;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #edf4fa;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>Reservas de pasajes</h1>
+            <p>Selecciona un viaje y el asiento disponible.</p>
+        </div>
+        <div>
+            <a href="/pasajero.html">Volver a viajes</a>
+            <button id="btnSalir" type="button">Cerrar sesión</button>
+        </div>
+    </header>
+
+    <div class="grupo">
+        <label for="viaje">Viaje:</label>
+        <select id="viaje"></select>
+        <button id="btnCargarAsientos" type="button">Consultar disponibilidad</button>
+    </div>
+
+    <p id="mensaje"></p>
+
+    <div class="resumen">
+        <strong>Asiento seleccionado:</strong> <span id="asientoSeleccionado">Ninguno</span>
+    </div>
+
+    <div id="grillaAsientos"></div>
+
+    <button id="btnReservar" type="button">Confirmar reserva</button>
+
+    <h2>Mis reservas</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Viaje</th>
+                <th>Asiento</th>
+                <th>Estado</th>
+                <th>Fecha reserva</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="tablaReservas"></tbody>
+    </table>
+
+    <script src="/reservas.js"></script>
+</body>
+</html>

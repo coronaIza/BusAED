@@ -2,49 +2,103 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Gestión de Buses</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 10px; }
-        form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        input, select, button { padding: 6px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #999; padding: 6px; text-align: left; }
-        th { background: #eee; }
-        #mensaje { min-height: 22px; font-weight: bold; }
-        .ok { color: green; }
-        .error { color: red; }
-    </style>
+    <title>Buses | Agencia de Buses</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Gestión de Buses</h1>
+<body class="bg-light">
 
-    <!-- Aquí se muestra la respuesta del backend (éxito o error) -->
-    <p id="mensaje"></p>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/index.html"><i class="bi bi-bus-front"></i> AgenciaBus Admin</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/index.html">Buses</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/rutas.html">Rutas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/viajes.html">Viajes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/personal.html">Personal</a></li>
+                </ul>
+                <button class="btn btn-outline-light btn-sm" id="btnCerrarSesion">Cerrar Sesión</button>
+            </div>
+        </div>
+    </nav>
 
-    <!-- Formulario: sirve para REGISTRAR (POST) y para EDITAR (PUT) -->
-    <form id="formulario">
-        <input type="hidden" id="id">
-        <input type="text" id="placa" placeholder="Placa (ABC-123)" required>
-        <input type="text" id="modelo" placeholder="Modelo" required>
-        <input type="number" id="capacidad" placeholder="Capacidad" min="1" required>
-        <select id="estado">
-            <option value="ACTIVO">ACTIVO</option>
-            <option value="INACTIVO">INACTIVO</option>
-            <option value="MANTENIMIENTO">MANTENIMIENTO</option>
-        </select>
-        <button type="submit" id="btnGuardar">Registrar bus</button>
-        <button type="button" id="btnCancelar" hidden>Cancelar edición</button>
-    </form>
+    <div class="container">
+        <h2 class="fw-bold mb-4">Gestión de Buses</h2>
+        <p id="mensaje" role="status" class="text-center"></p>
 
-    <!-- Tabla: se llena con los datos reales que devuelve GET /api/buses -->
-    <table>
-        <thead>
-            <tr><th>ID</th><th>Placa</th><th>Modelo</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr>
-        </thead>
-        <tbody id="tabla"></tbody>
-    </table>
+        <div class="row">
+            <!-- Formulario -->
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Registrar / Editar Bus</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="formulario">
+                            <input type="hidden" id="id">
+                            <div class="mb-3">
+                                <label class="form-label">Placa</label>
+                                <input type="text" id="placa" class="form-control" placeholder="ABC-123" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Modelo</label>
+                                <input type="text" id="modelo" class="form-control" placeholder="Ej. Mercedes Benz" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Capacidad</label>
+                                <input type="number" id="capacidad" class="form-control" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Estado</label>
+                                <select id="estado" class="form-select">
+                                    <option value="ACTIVO">ACTIVO</option>
+                                    <option value="INACTIVO">INACTIVO</option>
+                                    <option value="MANTENIMIENTO">MANTENIMIENTO</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Guardar Bus</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
-    <script src="buses.js"></script>
+            <!-- Tabla -->
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Placa</th>
+                                        <th>Modelo</th>
+                                        <th>Capacidad</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/buses.js"></script>
+    <script>
+        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+            sessionStorage.removeItem('token');
+            window.location.href = '/login.html';
+        });
+    </script>
 </body>
 </html>

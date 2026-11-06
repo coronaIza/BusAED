@@ -11,14 +11,22 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique = true, nullable = false)
+    // Aquí le decimos a Spring: "La variable se llama correo,
+    // pero guárdala en la columna 'email' de la base de datos".
+    @Column(name = "email", unique = true, nullable = false)
     private String correo;
 
-    @Column(nullable = false)
+    // Y aquí: "La variable se llama clave,
+    // pero guárdala en la columna 'password' de la base de datos"
+    @Column(name = "password", nullable = false)
     private String clave;
 
     private String nombre;
-    private String rol; // ADMIN o PASAJERO
+    private String rol; // ADMIN, PASAJERO, CHOFER, etc.
+
+    // NUEVO: Atributo para el borrado lógico
+    @Column(name = "estado")
+    private String estado = "ACTIVO";
 
     public Usuario() {}
 
@@ -27,6 +35,7 @@ public class Usuario {
         this.clave = clave;
         this.nombre = nombre;
         this.rol = rol;
+        this.estado = "ACTIVO"; // Por defecto al crear la cuenta
     }
 
     public Integer getId() { return id; }
@@ -43,4 +52,7 @@ public class Usuario {
 
     public String getRol() { return rol; }
     public void setRol(String rol) { this.rol = rol; }
+
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 }
