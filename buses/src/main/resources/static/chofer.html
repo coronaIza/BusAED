@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Chofer | Agencia de Buses</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-bus-front"></i> Portal del Conductor</a>
+            <div class="ms-auto d-flex align-items-center">
+                <span id="saludo" class="text-white me-3 fw-bold"></span>
+                <button class="btn btn-outline-light btn-sm" id="btnSalir">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="fw-bold">Mis Tareas Asignadas</h2>
+                <p class="text-muted">Selecciona una acción para gestionar tu ruta actual.</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Consultar Ruta -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-4 hover-effect">
+                    <i class="bi bi-map text-primary fs-1 mb-3"></i>
+                    <h5 class="card-title">Consultar Hoja de Ruta</h5>
+                    <button id="btnConsultarRuta" class="btn btn-primary mt-auto w-100">Ver Detalles</button>
+                </div>
+            </div>
+            
+            <!-- Validar Abordaje -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-4 hover-effect">
+                    <i class="bi bi-person-check text-success fs-1 mb-3"></i>
+                    <h5 class="card-title">Validar Pasajeros</h5>
+                    <button id="btnValidarPasajeros" class="btn btn-success mt-auto w-100">Iniciar Revisión</button>
+                </div>
+            </div>
+
+            <!-- Registro Viaje -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-4 hover-effect">
+                    <i class="bi bi-clock-history text-info fs-1 mb-3"></i>
+                    <h5 class="card-title">Registro de Viaje</h5>
+                    <button id="btnRegistroViaje" class="btn btn-info text-white mt-auto w-100">Marcar Inicio/Fin</button>
+                </div>
+            </div>
+
+            <!-- Reportar Incidencia -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-4 hover-effect">
+                    <i class="bi bi-exclamation-triangle text-danger fs-1 mb-3"></i>
+                    <h5 class="card-title">Reportar Incidencia</h5>
+                    <button id="btnIncidencia" class="btn btn-danger mt-auto w-100">Crear Reporte</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <div class="row mt-4 d-none" id="panelChoferExtra">
+          <div class="col-lg-6 d-none" id="panelPasajeros">
+            <div class="card border-0 shadow-sm"><div class="card-header bg-dark text-white fw-bold">Pasajeros del viaje seleccionado</div><div class="card-body" id="listaPasajeros"></div></div>
+          </div>
+          <div class="col-lg-6 d-none" id="panelIncidencias">
+            <div class="card border-0 shadow-sm"><div class="card-header bg-dark text-white fw-bold">Reportar incidencia o avería</div>
+              <div class="card-body"><div class="mb-2"><label class="form-label">Viaje</label><select id="incidenciaViaje" class="form-select"></select></div>
+              <div class="mb-2"><label class="form-label">Tipo</label><select id="tipoIncidencia" class="form-select"><option>Avería</option><option>Incidencia de tráfico</option><option>Accidente</option><option>Otro</option></select></div>
+              <div class="mb-2"><label class="form-label">Descripción</label><textarea id="descripcionIncidencia" class="form-control"></textarea></div>
+              <div class="mb-2"><label class="form-label">Fotografías (URLs, separadas por coma)</label><input id="fotosIncidencia" class="form-control"></div>
+              <button id="guardarIncidencia" class="btn btn-danger w-100">Enviar reporte</button></div></div>
+          </div>
+        </div>
+        <!-- CONTENEDOR DINÁMICO: Hoja de Ruta y Registro de Viaje (Oculto por defecto) -->
+        <!-- ========================================================================= -->
+        <div class="mt-5 mb-5" id="seccionHojaRuta" style="display: none;">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold" id="tituloSeccion"><i class="bi bi-list-task"></i> Mi Hoja de Ruta Activa</h5>
+                    <button class="btn btn-sm btn-outline-light" id="btnCerrarSeccion"><i class="bi bi-x-lg"></i> Ocultar</button>
+                </div>
+                <div class="card-body">
+                    <p id="mensajeChofer" class="text-center fw-bold"></p>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ruta (Origen → Destino)</th>
+                                    <th>Fecha y Hora</th>
+                                    <th>Placa del Bus</th>
+                                    <th>Estado Actual</th>
+                                    <th id="columnaAccion">Acción (Registro)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaViajes">
+                                <!-- Se llenará mediante JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ========================================================================= -->
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/chofer.js"></script>
+    <style>
+        .hover-effect { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .hover-effect:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; cursor: pointer;}
+    </style>
+</body>
+</html>
