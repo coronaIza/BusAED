@@ -28,6 +28,7 @@ com\agencia\buses\controlador\VentaControlador.class
 com\agencia\buses\negocio\IChoferNegocio.class
 com\agencia\buses\controlador\PaginaControlador.class
 com\agencia\buses\dao\IChoferDAO.class
+com\agencia\buses\config\MigracionIncidencia.class
 com\agencia\buses\BusesApplication.class
 com\agencia\buses\controlador\EncomiendaControlador.class
 com\agencia\buses\modelo\Reserva.class

@@ -13,6 +13,44 @@ const btnCancelar = document.getElementById("btnCancelar");
 
 const tabla = document.getElementById("tabla");
 const mensaje = document.getElementById("mensaje");
+const tablaIncidencias = document.getElementById("tablaIncidencias");
+
+async function cargarIncidencias() {
+    if (!tablaIncidencias) return;
+    tablaIncidencias.innerHTML = "<tr><td colspan='5' class='text-center text-muted'>Cargando reportes...</td></tr>";
+    try {
+        const [respuestaIncidencias, respuestaViajes] = await Promise.all([
+            fetch("/api/incidencias"),
+            fetch("/api/viajes")
+        ]);
+        if (!respuestaIncidencias.ok) throw new Error("No se pudieron obtener los reportes");
+
+        const incidencias = await respuestaIncidencias.json();
+        if (!Array.isArray(incidencias)) throw new Error("Formato de reportes inválido");
+        const viajes = respuestaViajes.ok ? await respuestaViajes.json() : [];
+        const viajesPorId = new Map(viajes.map(viaje => [viaje.id, viaje]));
+
+        if (!incidencias.length) {
+            tablaIncidencias.innerHTML = "<tr><td colspan='5' class='text-center text-muted'>No hay reportes registrados.</td></tr>";
+            return;
+        }
+
+        tablaIncidencias.innerHTML = incidencias.map(incidencia => {
+            const viaje = viajesPorId.get(incidencia.idViaje);
+            const ruta = viaje ? `${viaje.origen || '-'} → ${viaje.destino || '-'}` : `Viaje #${incidencia.idViaje}`;
+            const fecha = incidencia.fecha ? new Date(incidencia.fecha).toLocaleString("es-PE") : "-";
+            return `<tr>
+                <td>${incidencia.id}</td>
+                <td>${ruta}</td>
+                <td>${incidencia.tipo || "-"}</td>
+                <td>${incidencia.descripcion || "-"}</td>
+                <td>${fecha}</td>
+            </tr>`;
+        }).join("");
+    } catch (error) {
+        tablaIncidencias.innerHTML = "<tr><td colspan='5' class='text-center text-danger'>No se pudieron cargar los reportes.</td></tr>";
+    }
+}
 
 async function tokenCsrf() {
     const respuesta = await fetch("/api/auth/csrf");
@@ -127,6 +165,7 @@ if(formulario) {
             mostrarMensaje(editando ? "Bus actualizado exitosamente" : "Bus registrado exitosamente", false);
             setTimeout(() => { if(mensaje) mensaje.textContent = ""; }, 3000);
             cargarBuses();
+            cargarIncidencias();
         } catch (e) {
             mostrarMensaje("No se pudo conectar con el servidor", true);
         }
@@ -177,3 +216,4 @@ if(btnCancelar) {
 
 // Iniciar la carga
 cargarBuses();
+cargarIncidencias();

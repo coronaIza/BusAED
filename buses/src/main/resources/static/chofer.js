@@ -23,6 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const panelPasajeros = document.getElementById("panelPasajeros");
     const panelIncidencias = document.getElementById("panelIncidencias");
 
+    function ocultarPanelesChofer() {
+        seccionHojaRuta.style.display = "none";
+        panelExtra.classList.add("d-none");
+        panelPasajeros.classList.add("d-none");
+        panelIncidencias.classList.add("d-none");
+    }
+
     document.getElementById("btnValidarPasajeros")?.addEventListener("click", cargarPasajerosChofer);
     document.getElementById("btnIncidencia")?.addEventListener("click", mostrarIncidencia);
     document.getElementById("guardarIncidencia")?.addEventListener("click", guardarIncidencia);
@@ -34,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function mostrarSeccionHojaRuta(modo) {
         modoActual = modo; // Guardamos el modo seleccionado
+        ocultarPanelesChofer();
         seccionHojaRuta.style.display = "block";
         
         // Adaptamos la interfaz visualmente
@@ -207,6 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function cargarPasajerosChofer() {
+        ocultarPanelesChofer();
         panelExtra.classList.remove("d-none");
         panelPasajeros.classList.remove("d-none");
         panelIncidencias.classList.add("d-none");
@@ -245,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     async function mostrarIncidencia() {
+        ocultarPanelesChofer();
         panelExtra.classList.remove("d-none");
         panelPasajeros.classList.add("d-none");
         panelIncidencias.classList.remove("d-none");
@@ -256,17 +266,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function guardarIncidencia() {
+        const aviso = document.getElementById("avisoIncidencia");
         const cuerpo = {
             idViaje: Number(document.getElementById("incidenciaViaje").value),
             tipo: document.getElementById("tipoIncidencia").value,
-            descripcion: document.getElementById("descripcionIncidencia").value,
-            fotos: document.getElementById("fotosIncidencia").value
+            descripcion: document.getElementById("descripcionIncidencia").value
         };
         const respuesta = await fetch("/api/incidencias", {
             method: "POST", headers: {"Content-Type":"application/json","X-XSRF-TOKEN":await obtenerCsrf()},
             body: JSON.stringify(cuerpo)
         });
-        mostrarMensaje(respuesta.ok ? "Incidencia registrada correctamente." : await textoDeError(respuesta), !respuesta.ok);
+        if (respuesta.ok) {
+            aviso.className = "alert alert-success";
+            aviso.textContent = "Reporte de avería enviado correctamente.";
+            mostrarMensaje("Incidencia registrada correctamente.", false);
+            document.getElementById("descripcionIncidencia").value = "";
+        } else {
+            const error = await textoDeError(respuesta);
+            aviso.className = "alert alert-danger";
+            aviso.textContent = error;
+            mostrarMensaje(error, true);
+        }
     }
 
     // Inicializar (oculto visualmente pero carga el nombre del chofer)

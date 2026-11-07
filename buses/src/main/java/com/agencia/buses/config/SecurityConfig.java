@@ -75,6 +75,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfRepository)
+                        .ignoringRequestMatchers("/api/incidencias/**")
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
                 .securityContext(security -> security.securityContextRepository(securityContextRepository))
                 .authorizeHttpRequests(authorize -> authorize
@@ -90,7 +91,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/buses/**", "/api/choferes/**", "/api/auth/usuarios/**").hasRole("ADMIN")
                         .requestMatchers("/api/reservas/**").hasAnyRole("CLIENTE", "ADMIN", "CHOFER", "TAQUILLERO")
                         .requestMatchers("/api/ventas/**", "/api/encomiendas/**").hasRole("TAQUILLERO")
-                        .requestMatchers("/api/incidencias/**").hasAnyRole("CHOFER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/incidencias/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/incidencias/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/viajes/*/pasajeros").hasAnyRole("CHOFER", "ADMIN", "TAQUILLERO")
                         // CHOFER: solo SU hoja de ruta.
                         .requestMatchers("/api/viajes/mi-hoja/**").hasRole("CHOFER")
